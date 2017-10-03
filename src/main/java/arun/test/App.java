@@ -2,26 +2,41 @@ package arun.test;
 
 import java.io.IOException;
 import java.util.Arrays;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class App {
 	
-	public static void main(String[] args) throws IOException {
-
-		ApplicationContext context = new ClassPathXmlApplicationContext("Beans.xml");
+	private static FileService getFileServiceBean() {
 		
-		FileService obj = (FileService) context.getBean("FileService");
+		try(ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("Beans.xml")){
+			
+			return (FileService) context.getBean("FileService");
+		}		
+	}
 		
-		obj.getFileInfo().iterator().forEachRemaining(file -> {
+	private static void getFilesByMimeType(String mimeType) throws IOException{
 				
-			System.out.println(Arrays.asList(file));
-		});
-		
-		obj.filterFilesByMimeType("application/msword").iterator().forEachRemaining(file -> {
+		getFileServiceBean().filterFilesByMimeType(mimeType).iterator().forEachRemaining(file -> {
 			
 		System.out.println(Arrays.asList(file).get(4));
 		
 	    });
+	}
+		
+	public static void main(String[] args) throws IOException {
+		
+		FileService files = getFileServiceBean();
+					
+		//Get filename, file mime type, file size, file extension of all files in the configured directory
+		files.getFileInfo().iterator().forEachRemaining(file -> {
+				
+			System.out.println(Arrays.asList(file));
+		});
+		
+		//Filter files by mime type -> Excel
+		getFilesByMimeType("application/vndms-excel,application/excel,application/x-excel,application/x-msexcel,application/msword");
+				
+		////Filter files by mime type -> CSV
+		getFilesByMimeType("application/octet-stream");
 	}
 }

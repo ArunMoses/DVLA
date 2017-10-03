@@ -14,6 +14,7 @@ import eu.medsea.mimeutil.MimeUtil;
 
 public class FileService {
 
+	//Configure Mime Detector upon the bean is instantiated
 	public void init() {
 
 		MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
@@ -21,6 +22,7 @@ public class FileService {
 		MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.OpendesktopMimeDetector");
 	}
 
+	//Scan configured directory to return --> filename, file mime type, file size, file extension
 	public List<String[]> getFileInfo() throws IOException {
 
 		List<String[]> fileInfo = new ArrayList<>();
@@ -44,6 +46,7 @@ public class FileService {
 		return fileInfo;
 	}
 
+	//Retrieve files by mime type
 	public List<String[]> filterFilesByMimeType(String mimeType) throws IOException {
 
 		List<String[]> filteredFileInfo = new ArrayList<>();
@@ -68,10 +71,7 @@ public class FileService {
 										MimeUtil.getMimeTypes(file.toFile()).toString(),
 										file.toString()									
 									});	
-						
-						
-						
-						
+													
 					});
 		}
 		return filteredFileInfo;

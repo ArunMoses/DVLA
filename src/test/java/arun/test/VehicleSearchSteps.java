@@ -10,13 +10,15 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 
 public class VehicleSearchSteps {
 
 	WebDriver driver;
 
-	List<String> vehicleReg;
+	List<List<String>> vehicleReg;
 	
 	@Before
 	public void setUp() {
@@ -34,7 +36,7 @@ public class VehicleSearchSteps {
 	@Given("^I have a file containing numerous vehicle details$")
 	public void Given_I_have_a_file_containing_numerous_vehicle_details() throws Exception {
 
-		vehicleReg = new StepHelper().getVehicleDetails();
+		vehicleReg = new GetVehiclesData().getVehicleDetails();
 	}
 
 	@When("^I navigate to DVLA site to search for vehicle$")
@@ -48,44 +50,26 @@ public class VehicleSearchSteps {
 
 		driver.findElement(By.cssSelector("#get-started .button")).click();
 
-		vehicleReg.stream().forEach(vehicle -> {
+		AtomicInteger index = new AtomicInteger(0);
+		
+		vehicleReg.get(0).stream().forEach(vehicle -> {
 
 			driver.findElement(By.cssSelector("#Vrm")).sendKeys(vehicle);
+			
 			driver.findElement(By.cssSelector("[name='Continue']")).click();
+			
+			System.out.println("SEARCHING FOR " + vehicle + " " + vehicleReg.get(1).get(index.get()) + " " + vehicleReg.get(2).get(index.get()));
+			
+			Assert.assertEquals(driver.findElement(By.cssSelector(".reg-mark")).getText(), vehicle);
+			
+			Assert.assertEquals(driver.findElement(By.cssSelector("li.list-summary-item:nth-child(2) > span:nth-child(2) > strong:nth-child(1)")).getText(), vehicleReg.get(1).get(index.get()));
+			
+			Assert.assertEquals(driver.findElement(By.cssSelector("li.list-summary-item:nth-child(3) > span:nth-child(2) > strong:nth-child(1)")).getText(), vehicleReg.get(2).get(index.get()));
+						
+			driver.findElement(By.cssSelector(".back-to-previous")).click();
 
-			if (verifyElementPresent(driver, By.cssSelector(".reg-mark"))) {
-
-				Assert.assertEquals(driver.findElement(By.cssSelector(".reg-mark")).getText(), vehicle);
-								
-			} else {
-
-				driver.findElement(By.cssSelector(".action > a:nth-child(1)")).click();	
-			}
-
+			index.incrementAndGet();
+			
 		});
-
-	}
-
-	private boolean verifyElementPresent(WebDriver driver, By locator) {
-
-		boolean present = false;
-
-		for (int sec = 0; sec <= 5; sec++) {
-
-			if (sec == 5)
-				break;
-
-			try {
-
-				if (driver.findElement(locator).isDisplayed()) {
-
-					present = true;
-				}
-			} catch (Exception e) {
-
-			}
-		}
-
-		return present;
 	}
 }
